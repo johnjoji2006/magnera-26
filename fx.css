@@ -1,0 +1,173 @@
+/* Magnera FX — shared by index.html and the realm pages (see fx.js) */
+
+/* ═══════════ Portal ═══════════
+   .portal is the ring's opening itself, measured from the island art
+   (centre 56.79% / 25.52% of the image, 14.49% × 23.99% of it).
+   Pure CSS layers: opening = scale/opacity, currents & ripples = rotate/scale.
+   Everything animates on the compositor — no per-frame JavaScript. */
+
+.portal {
+  --glow: color-mix(in srgb, var(--accent) 70%, white 30%);
+  position: absolute;
+  left: 56.79%;
+  top: 25.52%;
+  width: 14.49%;
+  height: 23.99%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.island--mirrored .portal { left: 43.21%; }
+
+/* soft light spilling onto the stone ring */
+.portal__halo {
+  position: absolute;
+  inset: -24%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, transparent 64%, color-mix(in srgb, var(--accent) 34%, transparent) 78%, transparent);
+  opacity: .3;
+  transition: opacity .9s ease;
+}
+
+/* the opening: irises open from the centre */
+.portal__core {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(closest-side, transparent 78%, color-mix(in srgb, var(--glow) 52%, transparent) 97%),
+    radial-gradient(closest-side,
+      color-mix(in srgb, var(--glow) 74%, transparent) 0%,
+      color-mix(in srgb, var(--accent) 55%, transparent) 36%,
+      color-mix(in srgb, var(--accent) 38%, #0a0c1c) 72%,
+      color-mix(in srgb, var(--accent) 22%, #05060f) 100%);
+  opacity: 0;
+  transform: scale(.06);
+  transition: transform 1s cubic-bezier(.22, .8, .2, 1), opacity .7s ease;
+  will-change: transform, opacity;
+}
+
+/* slow light currents + dust — two large layers turning in opposite directions */
+.portal__drift {
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 32% 36%, color-mix(in srgb, var(--glow) 30%, transparent), transparent 24%),
+    radial-gradient(circle at 68% 58%, color-mix(in srgb, var(--glow) 24%, transparent), transparent 26%),
+    radial-gradient(circle at 46% 74%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 22%);
+  animation: portal-turn 22s linear infinite;
+}
+.portal__drift--b {
+  background:
+    radial-gradient(circle at 60% 30%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 22%),
+    radial-gradient(circle at 30% 64%, color-mix(in srgb, var(--glow) 20%, transparent), transparent 24%),
+    radial-gradient(1.6px 1.6px at 38% 42%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1.4px 1.4px at 62% 38%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1.8px 1.8px at 55% 66%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1.3px 1.3px at 41% 60%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.5px 1.5px at 68% 52%, rgba(255,255,255,.5), transparent);
+  animation-duration: 34s;
+  animation-direction: reverse;
+}
+
+/* faint ripples rolling outward */
+.portal__core::before,
+.portal__core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .22);
+  opacity: 0;
+  animation: portal-ripple 6s ease-out infinite;
+}
+.portal__core::after { animation-delay: -3s; }
+
+.portal.is-open .portal__halo { opacity: .75; }
+.portal.is-open .portal__core { opacity: .92; transform: scale(1); }
+
+/* closed portals don't animate at all */
+.portal:not(.is-open) .portal__drift,
+.portal:not(.is-open) .portal__core::before,
+.portal:not(.is-open) .portal__core::after { animation-play-state: paused; }
+
+@keyframes portal-turn { to { rotate: 360deg; } }
+@keyframes portal-ripple {
+  0%   { transform: scale(.08); opacity: 0; }
+  30%  { opacity: .7; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* ═══════════ Warp: fly through the portal (island click / back button) ═══════════
+   fx.js sizes .warp__veil to the clicked portal and grows it past the screen edges,
+   so the portal itself becomes the transition. Motion is Web Animations (transform/opacity). */
+
+:root { --warp-deep: #0d0b16; }
+
+.warp {
+  --tint: #7fa8ff;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  contain: strict;
+  visibility: hidden;
+  pointer-events: none;
+}
+.warp.is-on { visibility: visible; pointer-events: auto; }
+
+/* the portal, growing: lit rim, then its colour, then night at the centre of the dive */
+.warp__veil {
+  position: absolute;
+  width: 800px;             /* fixed size: rasterised once, only ever scaled (see VEIL in fx.js) */
+  height: 800px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  will-change: transform, opacity;
+  background: radial-gradient(closest-side,
+    var(--warp-deep) 0%,
+    color-mix(in srgb, var(--tint) 16%, var(--warp-deep)) 55%,
+    color-mix(in srgb, var(--tint) 45%, var(--warp-deep)) 86%,
+    color-mix(in srgb, var(--tint) 65%, #fff 10%) 97%,
+    color-mix(in srgb, var(--tint) 40%, transparent) 100%);
+}
+
+/* faint light streaks rushing past — a 24 KB pre-rendered image, only scaled/rotated */
+.warp__streaks {
+  position: absolute;
+  width: 768px;             /* see STREAKS in fx.js */
+  height: 768px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  will-change: transform, opacity;
+  background: url("assets/fx-streaks.webp") center / 100% 100% no-repeat;
+}
+
+/* while warping, freeze the page's own looping animations (targeted — no page-wide restyle) */
+html.warp-busy :is(.track, .banner, .banner__tassel, .bridge__end svg, .portal__drift, .scroll-cue i),
+html.warp-busy .portal__core::before,
+html.warp-busy .portal__core::after { animation-play-state: paused; }
+
+/* ═══════════ Arriving through a warp ═══════════
+   An inline <head> script adds .warp-arrive (and --warp-tint) before first paint,
+   so the new page starts in the same night and fades in. */
+
+html.warp-arrive::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: radial-gradient(circle at 50% 45%,
+    color-mix(in srgb, var(--warp-tint, #7fa8ff) 22%, var(--warp-deep)) 0%,
+    var(--warp-deep) 60%);
+  pointer-events: none;
+}
+html.warp-arrive.warp-fade::after { opacity: 0; transition: opacity 1.1s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .warp__streaks { display: none; }
+  .portal__drift, .portal__core::before, .portal__core::after { animation: none; }
+  .portal__core { transition: opacity .3s; }
+}

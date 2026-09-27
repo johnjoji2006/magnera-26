@@ -1,0 +1,16 @@
+# Not part of the published site
+
+# local dev only
+.claude
+serve.py
+CLAUDE.md
+
+# design references + source art (the pages don't use these)
+assets/concept.webp
+assets/concept-v2.webp
+assets/layer2-island.webp
+
+# secrets + local Vercel config (never publish)
+.env*
+.vercel
+.gitignore

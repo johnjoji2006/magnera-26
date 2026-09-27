@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technical Events · Magnera '26</title>
+  <meta name="description" content="Technical Events at Magnera '26 — the annual fest of the Department of Computer Science, St. Berchmans College, Changanassery." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="assets/layer2-island-baked.webp" />
+  <link rel="stylesheet" href="fx.css" />
+  <link rel="stylesheet" href="event.css" />
+  <script>
+    // arriving through the island's warp: start in the warp's night, fx.js fades it in
+    try { if (sessionStorage.getItem("magnera:warp")) { const r = document.documentElement; r.classList.add("warp-arrive"); r.style.setProperty("--warp-tint", sessionStorage.getItem("magnera:tint") || "#7fa8ff"); } } catch {}
+  </script>
+</head>
+<body data-realm="technical" style="--accent:#3fa9ff">
+
+  <a class="back" href="index.html" data-warp-back>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5m5-5-5 5 5 5" /></svg>
+    Back to Magnera
+  </a>
+
+  <!-- HERO: the island's portal, open. Scrolling steps through it. -->
+  <header class="portal-hero">
+    <div class="portal-hero__frame">
+      <img decoding="async" class="portal-hero__sky" src="assets/realm-sky.webp" alt="" />
+      <div class="portal-hero__scene">
+        <img decoding="async" src="assets/layer2-island-baked.webp" alt="The Technical Events island's portal, open" draggable="false" />
+        <span class="portal" id="heroPortal" aria-hidden="true"></span>
+      </div>
+      <div class="portal-hero__intro">
+        <p class="eyebrow"><i class="gem"></i>Realm of builders</p>
+        <h1>Technical Events</h1>
+      </div>
+      <div class="scroll-cue" aria-hidden="true">Scroll to enter<i></i></div>
+      <div class="portal-hero__veil"></div>
+    </div>
+  </header>
+
+  <main class="realm">
+    <div class="realm__inner">
+      <p class="eyebrow"><i class="gem"></i>Technical Events</p>
+      <h2>The realm of builders</h2>
+      <p class="lede">The full line-up, dates and registration details will be announced soon.</p>
+      <div class="cards">
+        <article class="card">
+          <span class="tag">Event 01</span>
+          <h3>Event title</h3>
+          <p>Description to be announced.</p>
+          <p class="meta">Date · Venue — TBA</p>
+        </article>
+        <article class="card">
+          <span class="tag">Event 02</span>
+          <h3>Event title</h3>
+          <p>Description to be announced.</p>
+          <p class="meta">Date · Venue — TBA</p>
+        </article>
+        <article class="card">
+          <span class="tag">Event 03</span>
+          <h3>Event title</h3>
+          <p>Description to be announced.</p>
+          <p class="meta">Date · Venue — TBA</p>
+        </article>
+        <article class="card">
+          <span class="tag">Event 04</span>
+          <h3>Event title</h3>
+          <p>Description to be announced.</p>
+          <p class="meta">Date · Venue — TBA</p>
+        </article>
+        <article class="card">
+          <span class="tag">Event 05</span>
+          <h3>Event title</h3>
+          <p>Description to be announced.</p>
+          <p class="meta">Date · Venue — TBA</p>
+        </article>
+        <article class="card">
+          <span class="tag">Event 06</span>
+          <h3>Event title</h3>
+          <p>Description to be announced.</p>
+          <p class="meta">Date · Venue — TBA</p>
+        </article>
+      </div>
+    </div>
+    <footer class="footer">© Magnera ’26 · Department of Computer Science, St. Berchmans College</footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script src="fx.js"></script>
+  <script src="event.js"></script>
+</body>
+</html>
