@@ -304,7 +304,9 @@ export function initLanding() {
     measureLayers();
     sizeBg();
     layers.forEach((l) => (l.last = ""));
-    frameLast.bg = frameLast.track = frameLast.hud = "";
+    // null, not "": the track's desktop value *is* "", so resetting to "" would skip
+    // clearing the mobile slide transform when the viewport widens past the breakpoint
+    frameLast.bg = frameLast.track = frameLast.hud = null;
   }
   on(window, "resize", onResize);
   on(mobile, "change", onResize);
@@ -324,7 +326,7 @@ export function initLanding() {
     wallsTop = walls.getBoundingClientRect().top + scrollY;
     wallsSpan = Math.max(1, walls.offsetHeight - innerHeight);
     wallsFrameH = walls.querySelector(".walls__frame").offsetHeight;
-    wallsLast = "";
+    wallsLast = null;   // force the next updateWalls() to write (or clear) the transform
   }
   on(window, "resize", measureWalls);
   on(window, "load", measureWalls);
@@ -333,7 +335,7 @@ export function initLanding() {
 
   function updateWalls() {
     if (!mobile.matches) {
-      if (wallsLast) { wallsLast = ""; wallsScene.style.transform = ""; }
+      if (wallsLast !== "") { wallsLast = ""; wallsScene.style.transform = ""; }
       return;
     }
     const p = Math.max(0, Math.min(1, (scrollY - wallsTop) / wallsSpan));

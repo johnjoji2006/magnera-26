@@ -645,6 +645,9 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
   z-index: 3;                /* over the top of the walls */
   height: 0;
   pointer-events: none;
+  /* the rock art is wider than the screen (250vw on mobile): clip its sides here, or the
+     page gets wider than the viewport and phones zoom out to fit it */
+  overflow-x: clip;
 }
 .seam img {
   position: absolute;
