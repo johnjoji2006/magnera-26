@@ -149,8 +149,8 @@ export function initLanding() {
           <stop offset="0" stop-color="#4a443b"/><stop offset=".4" stop-color="#9a8f7c"/><stop offset=".7" stop-color="#77705f"/><stop offset="1" stop-color="#3f3a32"/>
         </linearGradient>
         <radialGradient id="br-lamp"><stop offset="0" stop-color="#ffc47a" stop-opacity=".5"/><stop offset="1" stop-color="#ff9a4a" stop-opacity="0"/></radialGradient>
-        <radialGradient id="br-blue"><stop offset="0" stop-color="#7fd6ff" stop-opacity=".45"/><stop offset="1" stop-color="#3fa9ff" stop-opacity="0"/></radialGradient>
-        <radialGradient id="br-pink"><stop offset="0" stop-color="#ff9cc4" stop-opacity=".45"/><stop offset="1" stop-color="#ff3b8a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="br-blue"><stop offset="0" stop-color="#ff8f98" stop-opacity=".45"/><stop offset="1" stop-color="#e5303f" stop-opacity="0"/></radialGradient>
+        <radialGradient id="br-pink"><stop offset="0" stop-color="#8fc4ff" stop-opacity=".45"/><stop offset="1" stop-color="#2f8cff" stop-opacity="0"/></radialGradient>
       </defs>`;
 
     const L = 44, R = 356;
@@ -229,7 +229,7 @@ export function initLanding() {
     }
 
     // stone pillars: carved rings, moss caps, a small crystal set in each
-    for (const [x, halo, crystal] of [[L, "br-blue", "#9fdcf5"], [R, "br-pink", "#f2a9c6"]]) {
+    for (const [x, halo, crystal] of [[L, "br-blue", "#f5a9ad"], [R, "br-pink", "#a9cdf5"]]) {
       el("path", { d: `M${x - 8} 66 L${x + 8} 66 L${x + 6.5} 58 L${x - 6.5} 58 Z`, style: "fill:url(#br-stone)" });
       el("rect", { x: x - 4.5, y: 12, width: 9, height: 47, style: "fill:url(#br-stone)" });
       for (const y of [22, 38, 52]) el("line", { x1: x - 4.5, y1: y, x2: x + 4.5, y2: y, style: "stroke:#3a352e;stroke-width:.8" });
@@ -277,14 +277,21 @@ export function initLanding() {
   // Size the background art explicitly (instead of object-fit/object-position) so the
   // mobile pan is a plain translate — composited, no repaint.
   function sizeBg() {
-    const lw = bgLayer.offsetWidth, lh = bgLayer.offsetHeight, ar = 1672 / 941;
+    const lw = bgLayer.offsetWidth, lh = bgLayer.offsetHeight, ar = 3484 / 1959;
     const w = Math.max(lw, lh * ar), h = w / ar;
     const posX = mobile.matches ? 0.575 : 0.5;   // tower centred on phones
     bgOverflow = w - lw;
     Object.assign(bgImg.style, {
       width: `${w}px`, height: `${h}px`,
-      left: `${(lw - w) * posX}px`, top: `${(lh - h) * 0.4}px`,
+      left: `${(lw - w) * posX + 10}px`, top: `${(lh - h) * 0.4}px`,
     });
+    // Publish where the art sits so CSS can pin the islands to it (see .panel--tech): they
+    // then track the artwork at every window size instead of drifting as the crop changes.
+    const st = stage.style;
+    st.setProperty("--bgw", `${w}px`);
+    st.setProperty("--bgh", `${h}px`);
+    st.setProperty("--bgx", `${(lw - w) * posX}px`);
+    st.setProperty("--bgy", `${(lh - h) * 0.4}px`);
   }
   // Each layer is oversized (inset: -5%) so parallax never shows its edges. Measure that
   // margin per layer; the loop clamps pointer/tilt movement (+ mobile pan) inside it.
@@ -303,15 +310,16 @@ export function initLanding() {
     stageW = stage.offsetWidth; stageH = stage.offsetHeight;
     measureLayers();
     sizeBg();
+    placeBridge();   // after sizeBg: the islands' CSS depends on the art's size
     layers.forEach((l) => (l.last = ""));
     // null, not "": the track's desktop value *is* "", so resetting to "" would skip
     // clearing the mobile slide transform when the viewport widens past the breakpoint
-    frameLast.bg = frameLast.track = frameLast.hud = null;
+    frameLast.bg = frameLast.far = frameLast.track = frameLast.hud = null;
   }
   on(window, "resize", onResize);
   on(mobile, "change", onResize);
 
-  const frameLast = { bg: "", track: "", hud: "" };
+  const frameLast = { bg: "", far: "", track: "", hud: "" };
   const write = (key, el, value) => { if (frameLast[key] !== value) { frameLast[key] = value; el.style.transform = value; } };
 
   /* ───────── About walls: on mobile, scrolling pans from wall 1 to wall 2 ─────────
@@ -321,11 +329,12 @@ export function initLanding() {
   const WALLS = { centres: [0.308, 0.7165], ar: 1672 / 941 };
   const walls = document.querySelector(".walls");
   const wallsScene = walls.querySelector(".walls__scene");
-  let wallsTop = 0, wallsSpan = 1, wallsFrameH = 0, wallsLast = "";
+  let wallsTop = 0, wallsSpan = 1, wallsFrameH = 0, wallsSceneH = 0, wallsLast = "";
   function measureWalls() {
     wallsTop = walls.getBoundingClientRect().top + scrollY;
     wallsSpan = Math.max(1, walls.offsetHeight - innerHeight);
     wallsFrameH = walls.querySelector(".walls__frame").offsetHeight;
+    wallsSceneH = wallsScene.offsetHeight;
     wallsLast = null;   // force the next updateWalls() to write (or clear) the transform
   }
   on(window, "resize", measureWalls);
@@ -334,11 +343,18 @@ export function initLanding() {
   measureWalls();
 
   function updateWalls() {
+    const p = Math.max(0, Math.min(1, (scrollY - wallsTop) / wallsSpan));
     if (!mobile.matches) {
-      if (wallsLast !== "") { wallsLast = ""; wallsScene.style.transform = ""; }
+      if (reduceMotion) {
+        if (wallsLast !== "") { wallsLast = ""; wallsScene.style.transform = ""; }
+        return;
+      }
+      // hold the art's bottom edge on the bottom of the screen until the frame has fully arrived
+      const y = Math.min(innerHeight + scrollY - wallsTop, wallsFrameH) - wallsSceneH;
+      const t = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+      if (t !== wallsLast) { wallsLast = t; wallsScene.style.transform = t; }
       return;
     }
-    const p = Math.max(0, Math.min(1, (scrollY - wallsTop) / wallsSpan));
     const [c1, c2] = WALLS.centres;
     const x = vw / 2 - (c1 + (c2 - c1) * p) * wallsFrameH * WALLS.ar;
     const t = `translate3d(${x.toFixed(1)}px, 0, 0)`;
@@ -387,7 +403,7 @@ export function initLanding() {
       write("track", track, mobile.matches ? `translate3d(${((-1 - s) * vw).toFixed(1)}px, 0, 0)` : "");
       // top bar drifts up and fades
       const hud = `translate3d(0, ${(-sy * 0.25).toFixed(1)}px, 0)`;
-      if (frameLast.hud !== hud) { frameLast.hud = hud; hudTop.style.transform = hud; hudTop.style.opacity = Math.max(0, 1 - sy / 450).toFixed(3); }
+      if (hudTop && frameLast.hud !== hud) { frameLast.hud = hud; hudTop.style.transform = hud; hudTop.style.opacity = Math.max(0, 1 - sy / 450).toFixed(3); }
     }
 
     rafId = requestAnimationFrame(frame);
@@ -459,6 +475,44 @@ export function initLanding() {
     units.s.textContent = String(s).padStart(2, "0");
   }
 
+  /* ───────── Banner: drag it up and down ─────────
+     It rests raised, with its top tucked above the screen edge (CSS: translate -60%); pull it down
+     until the title is in view (SHOW), no further, or push it back up. Vertical only, and it stays
+     where it's dropped.
+     Moved with the `translate` property so it never fights the sway animation (`rotate`). Sizes are
+     read only when a drag starts, never in the render loop. */
+
+  const banner = document.getElementById("hero");
+  if (banner) {
+    const HIDE = -0.6, SHOW = -0.15;   // raised / lowered limits, as fractions of the banner's own height
+    let y = null, minY = 0, maxY = 0, startY = 0, startPointerY = 0, dragging = false;
+    const measure = () => {
+      const h = banner.offsetHeight;
+      minY = h * HIDE;
+      maxY = h * SHOW;
+      if (y === null) y = minY;
+    };
+    const moveTo = (v) => { y = Math.max(minY, Math.min(maxY, v)); banner.style.translate = `0 ${y}px`; };
+    on(banner, "pointerdown", (e) => {
+      if (e.button) return;
+      measure();
+      dragging = true; startY = y; startPointerY = e.clientY;
+      banner.classList.add("is-dragging", "is-touched");   // is-touched: stop the "pull me" teasing
+      banner.setPointerCapture(e.pointerId);
+    });
+    on(banner, "pointermove", (e) => { if (dragging) moveTo(startY + e.clientY - startPointerY); });
+    const end = () => { dragging = false; banner.classList.remove("is-dragging"); };
+    on(banner, "pointerup", end);
+    on(banner, "pointercancel", end);
+    on(banner, "keydown", (e) => {   // keyboard: ↑ / ↓
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      e.preventDefault(); measure();
+      banner.classList.add("is-touched");
+      moveTo(y + (e.key === "ArrowDown" ? 24 : -24));
+    });
+    on(window, "resize", () => { if (y !== null) { measure(); moveTo(y); } });
+  }
+
   /* ───────── Boot ───────── */
 
   buildBridge();
@@ -494,6 +548,7 @@ export function initLanding() {
   });
   measureLayers();
   sizeBg();
+  placeBridge();
   // landing scrolled away: pause its looping CSS animations (see .stage.is-offscreen)
   const offscreenObserver = new IntersectionObserver(([e]) => stage.classList.toggle("is-offscreen", !e.isIntersecting));
   offscreenObserver.observe(stage);
