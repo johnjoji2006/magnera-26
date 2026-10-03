@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Install: `npm install`
 - Dev server: `npm run dev` (Vite, default port 5173 — same port the old `serve.py` used). `.claude/launch.json` defines this as the `site` configuration.
 - Build: `npm run build` → `dist/`. `npm run preview` serves that build locally.
-- Deploy: Vercel project `magnera-26` (linked in `.vercel/`, `vercel.json` sets `framework: vite`). `.vercelignore` keeps `.claude`, `CLAUDE.md`, `design-refs` (unused source art, kept for reference but never published), `.env*` and `.vercel` out of the deploy.
+- Deploy: Vercel project `magnera-26` (linked in `.vercel/`, `vercel.json` sets `framework: vite`). `vercel.json` also sets cache headers for `/assets/*.webp|svg` (7 days + stale-while-revalidate — asset filenames are not hashed, so don't make them `immutable`). `.vercelignore` keeps `.claude`, `CLAUDE.md`, `design-refs` (unused source art, kept for reference but never published), `.env*` and `.vercel` out of the deploy.
 
 ## Architecture
 
@@ -66,6 +66,10 @@ Follow these when touching the animation code:
 ### Placeholders
 
 The Sponsors and Contact sections on the landing page and the event cards on the realm pages are still placeholder content ("Coming soon" / "TBA"). `.layer--leaves` is waiting on its asset.
+
+### Images
+
+All raster art is WebP only (no PNG fallbacks; every browser the site targets supports it). The hero sky is capped at 2560px wide (`sizeBg` in `landing.js` hardcodes its 2560/1439 aspect ratio — update both if the art changes). The balloon SVG embeds a small, palette-quantised logo; keep it that way rather than embedding a full-size PNG. Don't re-encode WebPs from the old PNGs — they were stale; re-encode from the current `.webp`.
 
 ## Migration history
 

@@ -10,6 +10,9 @@ export default defineConfig({
     port: 5173,
   },
   build: {
+    target: ["es2020", "chrome87", "firefox78", "safari14"],   // broad browser reach (individual transform props are CSS, not JS)
+    cssTarget: "safari14",
+    reportCompressedSize: false,
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),

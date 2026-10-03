@@ -15,15 +15,11 @@ export default function LandingPage() {
 
         {/* LAYER 1 — background: the hero sky with the floating campus islands (sharp, no blur) */}
         <div className="layer layer--bg" data-depth="0.014" data-scroll="0.55" data-pan="0" aria-hidden="true">
-          <picture>
-            <source srcSet="assets/hero-sky.webp" type="image/webp" />
-            <img decoding="async" src="assets/hero-sky.png" width="3484" height="1959" alt="" draggable="false" />
-          </picture>
+          <img decoding="async" fetchPriority="high" src="assets/hero-sky.webp" width="2560" height="1439" alt="" draggable="false" />
         </div>
 
-        {/* SPONSOR BALLOON — in the sky behind the islands. Drifts slowly on its own; drag, throw or
-            click it (src/lib/balloon.js). Painted in the scene's crimson/gold, sponsor logo on the envelope. */}
-        <div className="balloon" role="img" aria-label="LogTech Infoway hot air balloon — drag it to play">
+        {/* SPONSOR BALLOON — decorative, sits just above the background layer, behind the islands, banner and buttons, and never takes clicks (src/lib/balloon.js). */}
+        <div className="balloon" aria-hidden="true">
           <img decoding="async" src="assets/hot-air-balloon.svg" width="400" height="620" alt="" draggable="false" />
         </div>
 
@@ -111,6 +107,7 @@ export default function LandingPage() {
           <span className="banner__tassel" aria-hidden="true"></span>
         </div>
 
+
       </header>
 
       {/* ═══════════════ SECTIONS ═══════════════ */}
@@ -120,10 +117,7 @@ export default function LandingPage() {
             rock underside hangs down over the top of the walls, carrying the eye from one
             section into the next. One piece of art, straddling the boundary. */}
         <div className="seam">
-          <picture>
-            <source srcSet="assets/cliff-bridge.webp" type="image/webp" />
-            <img src="assets/cliff-bridge.png" alt="A traveller standing on a floating cliff, looking out at the campus" width="2170" height="725" decoding="async" draggable="false" />
-          </picture>
+          <img src="assets/cliff-bridge.webp" alt="A traveller standing on a floating cliff, looking out at the campus" width="2170" height="725" decoding="async" draggable="false" />
         </div>
 
         {/* ABOUT: two lit stone walls. Desktop shows both; on mobile the section pins

@@ -42,7 +42,6 @@ export function initLanding() {
   const bgLayer = document.querySelector(".layer--bg");
   const bgImg = bgLayer.querySelector("img");
   const track = document.getElementById("track");
-  const hudTop = document.querySelector(".hud--top");
 
   const pointer = { x: 0, y: 0 };  // target, -1..1
   const eased = { x: 0, y: 0 };
@@ -51,7 +50,7 @@ export function initLanding() {
     if (e.pointerType === "touch") return;
     pointer.x = (e.clientX / innerWidth) * 2 - 1;
     pointer.y = (e.clientY / innerHeight) * 2 - 1;
-  });
+  }, { passive: true });
   on(document, "pointerleave", () => { pointer.x = 0; pointer.y = 0; });
 
   // Phones: tilt drives the parallax (iOS needs a permission prompt; skipped there)
@@ -61,7 +60,7 @@ export function initLanding() {
     if (e.gamma == null) return;
     pointer.x = q(Math.max(-1, Math.min(1, e.gamma / 25)));
     pointer.y = q(Math.max(-1, Math.min(1, (e.beta - 45) / 25)));
-  });
+  }, { passive: true });
 
   /* ───────── Mobile: bridge ⇄ island panels ───────── */
 
@@ -278,7 +277,7 @@ export function initLanding() {
   // Size the background art explicitly (instead of object-fit/object-position) so the
   // mobile pan is a plain translate — composited, no repaint.
   function sizeBg() {
-    const lw = bgLayer.offsetWidth, lh = bgLayer.offsetHeight, ar = 3484 / 1959;
+    const lw = bgLayer.offsetWidth, lh = bgLayer.offsetHeight, ar = 2560 / 1439;
     const w = Math.max(lw, lh * ar), h = w / ar;
     const posX = mobile.matches ? 0.575 : 0.5;   // tower centred on phones
     bgOverflow = w - lw;
@@ -315,12 +314,12 @@ export function initLanding() {
     layers.forEach((l) => (l.last = ""));
     // null, not "": the track's desktop value *is* "", so resetting to "" would skip
     // clearing the mobile slide transform when the viewport widens past the breakpoint
-    frameLast.bg = frameLast.far = frameLast.track = frameLast.hud = null;
+    frameLast.bg = frameLast.track = null;
   }
   on(window, "resize", onResize);
   on(mobile, "change", onResize);
 
-  const frameLast = { bg: "", far: "", track: "", hud: "" };
+  const frameLast = { bg: "", track: "" };
   const write = (key, el, value) => { if (frameLast[key] !== value) { frameLast[key] = value; el.style.transform = value; } };
 
   /* ───────── About walls: on mobile, scrolling pans from wall 1 to wall 2 ─────────
@@ -402,9 +401,6 @@ export function initLanding() {
       write("bg", bgImg, `translate3d(${(-bgOverflow * 0.24 * s).toFixed(1)}px, 0, 0) scale(${(1 + sy * 0.00018).toFixed(4)})`);
       // mobile island track
       write("track", track, mobile.matches ? `translate3d(${((-1 - s) * vw).toFixed(1)}px, 0, 0)` : "");
-      // top bar drifts up and fades
-      const hud = `translate3d(0, ${(-sy * 0.25).toFixed(1)}px, 0)`;
-      if (hudTop && frameLast.hud !== hud) { frameLast.hud = hud; hudTop.style.transform = hud; hudTop.style.opacity = Math.max(0, 1 - sy / 450).toFixed(3); }
     }
 
     rafId = requestAnimationFrame(frame);

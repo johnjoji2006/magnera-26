@@ -1,12 +1,12 @@
-// The sponsor's hot-air balloon: drifts slowly in wandering directions across the hero and can be
-// grabbed, dragged and thrown with the mouse/finger. Same conventions as the rest of the landing
+// The sponsor's hot-air balloon: drifts slowly in wandering directions across the hero. It is
+// purely decorative (not interactive) and sits just above the background layer, so the islands,
+// banner and buttons pass in front of it. Same conventions as the rest of the landing
 // code: one rAF loop that never reads layout (sizes are cached on resize) and only writes
 // `transform`; it idles while the hero is scrolled off screen.
 
 const WANDER_SPEED = 9;      // px/s, the slow cruising speed
 const TURN_RATE = 0.35;      // rad/s, how fast the heading meanders
-const MAX_THROW = 900;       // px/s, cap on a flung balloon
-const DRAG_FRICTION = 1.1;   // 1/s, how quickly a throw settles back to cruising
+const DRAG_FRICTION = 1.1;   // 1/s, how quickly velocity eases toward cruising
 
 export function initBalloon(stage, { reduceMotion = false } = {}) {
   const el = stage.querySelector(".balloon");
@@ -17,8 +17,6 @@ export function initBalloon(stage, { reduceMotion = false } = {}) {
   let vx = 0, vy = 0;            // px/s
   let heading = Math.random() * Math.PI * 2, headingTarget = heading, headingTimer = 0;
   let angle = 0, angVel = 0;     // swing (radians) hanging from the envelope
-  let dragging = false, pointerId = null, grabDX = 0, grabDY = 0, moved = 0;
-  let trail = [];                // recent pointer samples, for the throw velocity
   let last = performance.now(), raf = null, lastT = "", placed = false;
 
   function measure() {
@@ -52,7 +50,7 @@ export function initBalloon(stage, { reduceMotion = false } = {}) {
     const t = now / 1000;
     const prevVx = vx;
 
-    if (!dragging) {
+    {
       if (!reduceMotion) {
         // meander: pick a new heading every few seconds and ease toward it
         headingTimer -= dt;
@@ -100,61 +98,6 @@ export function initBalloon(stage, { reduceMotion = false } = {}) {
     write();
   }
 
-  // ───────── pointer: grab, drag, throw, poke ─────────
-  function pos(e) {
-    const r = stage.getBoundingClientRect();
-    return { px: e.clientX - r.left, py: e.clientY - r.top };
-  }
-  function onDown(e) {
-    if (e.button != null && e.button > 0) return;
-    e.preventDefault();
-    dragging = true; pointerId = e.pointerId; moved = 0; trail = [];
-    el.setPointerCapture?.(pointerId);
-    el.classList.add("is-held");
-    const { px, py } = pos(e);
-    grabDX = px - x; grabDY = py - y;
-    vx = vy = 0;
-    trail.push({ px, py, t: performance.now() });
-  }
-  function onMove(e) {
-    if (!dragging || e.pointerId !== pointerId) return;
-    const { px, py } = pos(e);
-    const nx = px - grabDX, ny = py - grabDY;
-    moved += Math.abs(nx - x) + Math.abs(ny - y);
-    // swing: the basket lags behind the hand
-    angVel += (x - nx) * 0.012;
-    x = nx; y = ny;
-    clamp();
-    const now = performance.now();
-    trail.push({ px, py, t: now });
-    while (trail.length > 2 && now - trail[0].t > 100) trail.shift();
-  }
-  function onUp(e) {
-    if (!dragging || e.pointerId !== pointerId) return;
-    dragging = false;
-    el.releasePointerCapture?.(pointerId);
-    el.classList.remove("is-held");
-    if (moved < 6) {
-      // a click: give it a friendly upward bump and a wobble
-      vy = -70; vx = (Math.random() - 0.5) * 60; angVel += (Math.random() - 0.5) * 2;
-      return;
-    }
-    // throw with the hand's recent velocity
-    const a = trail[0], b = trail[trail.length - 1];
-    const dtS = (b.t - a.t) / 1000;
-    if (dtS > 0.005) {
-      vx = (b.px - a.px) / dtS; vy = (b.py - a.py) / dtS;
-      const sp = Math.hypot(vx, vy);
-      if (sp > MAX_THROW) { vx *= MAX_THROW / sp; vy *= MAX_THROW / sp; }
-      heading = Math.atan2(vy, vx); headingTarget = heading;
-    }
-  }
-
-  el.addEventListener("pointerdown", onDown);
-  el.addEventListener("pointermove", onMove);
-  el.addEventListener("pointerup", onUp);
-  el.addEventListener("pointercancel", onUp);
-  el.addEventListener("dragstart", (e) => e.preventDefault());
   window.addEventListener("resize", measure);
 
   measure();
@@ -164,10 +107,6 @@ export function initBalloon(stage, { reduceMotion = false } = {}) {
 
   return function dispose() {
     if (raf != null) cancelAnimationFrame(raf);
-    el.removeEventListener("pointerdown", onDown);
-    el.removeEventListener("pointermove", onMove);
-    el.removeEventListener("pointerup", onUp);
-    el.removeEventListener("pointercancel", onUp);
     window.removeEventListener("resize", measure);
   };
 }

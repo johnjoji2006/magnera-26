@@ -39,6 +39,7 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
   rotate: 45deg;
   border: 2px solid var(--accent);
   border-radius: 3px;
+  background: rgba(255, 255, 255, .14);   /* fallback for browsers without color-mix */
   background: color-mix(in srgb, var(--accent) 30%, transparent);
   box-shadow: 0 0 14px var(--accent), inset 0 0 8px var(--accent);
 }
@@ -119,7 +120,6 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
 .stage.is-intro .layer--far,
 .stage.is-intro .layer--bg      { animation: settle 2.4s cubic-bezier(.2,.7,.1,1) both; }
 .stage.is-intro .layer--islands { animation: rise 2.2s .35s cubic-bezier(.2,.7,.1,1) both; }
-.stage.is-intro .hud            { animation: fade 1.4s 1s ease both; }
 
 @keyframes settle   { from { opacity: 0; scale: 1.12; } to { opacity: 1; scale: 1; } }
 @keyframes rise     { from { opacity: 0; translate: 0 8vh; } to { opacity: 1; translate: 0 0; } }
@@ -131,7 +131,7 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
 /* ═══════════ Layer 2 — islands + bridge + banner ═══════════ */
 
 /* the whole set (islands, bridge, banner) floats together */
-/* the islands layer is full-screen: let clicks fall through it to the balloon behind, but keep the islands and banner clickable */
+/* the islands layer is full-screen: let clicks fall through it, but keep the islands and banner clickable */
 .layer--islands { pointer-events: none; }
 .island, .banner, .bridge__end { pointer-events: auto; }
 .track { position: absolute; inset: 0; animation: bob 8s ease-in-out infinite; }
@@ -540,32 +540,6 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
   clip-path: polygon(50% 0, 70% 12px, 100% 100%, 0 100%, 30% 12px);
 }
 
-/* ═══════════ HUD ═══════════ */
-
-.hud { position: absolute; z-index: 10; }
-
-.hud--top {
-  inset: 0 0 auto 0;          /* drift/fade on scroll: main.js */
-  display: flex;
-  align-items: flex-start;
-  padding: clamp(16px, 2.2vw, 36px) clamp(16px, 3.5vw, 64px);
-  pointer-events: none;
-}
-.hud--top > * { pointer-events: auto; }
-
-.brand__college {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  line-height: 1.4;
-}
-.crest { width: 32px; height: 36px; flex: none; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
-
-
 /* ═══════════ CTA: gold waymarker plaque (bottom-right) ═══════════
    The one solid-gold element on the page, so the eye lands on it first. Arrow-tipped
    like a direction board, with an engraved edge and a gift medallion. Motion: a warm
@@ -972,22 +946,21 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
 .footer__nav a:hover, .footer__nav a:focus-visible { color: var(--gold-1); }
 .footer__copy { font-size: 12px; color: var(--ink-dim); }
 
-/* ═══════════ Sponsor hot-air balloon (interactive: src/lib/balloon.js) ═══════════
-   Sits behind the islands (DOM order) and below the HUD. balloon.js positions it with transform only. */
+/* ═══════════ Sponsor hot-air balloon (decorative: src/lib/balloon.js) ═══════════
+   Sits just above the background layer (it is placed right after .layer--bg in the DOM), so the islands, banner and
+   buttons pass in front of it. It ignores the pointer; balloon.js positions it with transform only. */
 .balloon {
   position: absolute;
   left: 0;
   top: 0;
   width: clamp(56px, 5.5vw, 104px);
-  cursor: grab;
-  touch-action: none;
+  pointer-events: none;
   transform-origin: 50% 22%;
   opacity: 0;                    /* shown once balloon.js has placed it */
   will-change: transform;
   -webkit-tap-highlight-color: transparent;
 }
 .balloon.is-ready { opacity: 1; transition: opacity .8s ease; }
-.balloon.is-held { cursor: grabbing; }
 .balloon img { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; }
 
 /* ═══════════ Mobile: bridge + sliding island carousel ═══════════ */
@@ -1150,5 +1123,5 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
   html:not(.lenis) { scroll-behavior: auto; }
   .reveal { opacity: 1; translate: none; transition: none; }
   .track, .banner, .banner__tassel, .bridge__end svg { animation: none; }
-  .stage.is-intro .layer, .stage.is-intro .hud { animation: none; }
+  .stage.is-intro .layer { animation: none; }
 }
