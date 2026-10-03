@@ -21,6 +21,12 @@ export default function LandingPage() {
           </picture>
         </div>
 
+        {/* SPONSOR BALLOON — in the sky behind the islands. Drifts slowly on its own; drag, throw or
+            click it (src/lib/balloon.js). Painted in the scene's crimson/gold, sponsor logo on the envelope. */}
+        <div className="balloon" role="img" aria-label="LogTech Infoway hot air balloon — drag it to play">
+          <img decoding="async" src="assets/hot-air-balloon.svg" width="400" height="620" alt="" draggable="false" />
+        </div>
+
         {/* LAYER 2 — floating islands.
             Desktop: two islands placed in the scene.
             Mobile:  a 3-panel track  [Technical] [bridge + hero] [Cultural]  that slides horizontally. */}

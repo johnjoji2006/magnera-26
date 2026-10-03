@@ -131,6 +131,9 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
 /* ═══════════ Layer 2 — islands + bridge + banner ═══════════ */
 
 /* the whole set (islands, bridge, banner) floats together */
+/* the islands layer is full-screen: let clicks fall through it to the balloon behind, but keep the islands and banner clickable */
+.layer--islands { pointer-events: none; }
+.island, .banner, .bridge__end { pointer-events: auto; }
 .track { position: absolute; inset: 0; animation: bob 8s ease-in-out infinite; }
 
 .panel { position: absolute; }
@@ -258,7 +261,7 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
   aspect-ratio: 400 / 110;
   overflow: visible;
   /* same warm sunset grade as the baked island art, so the bridge sits in the same light */
-  filter: sepia(.3) saturate(.95) brightness(1.1) hue-rotate(-6deg);
+  filter: sepia(.12) saturate(1) brightness(1.02);
 }
 .bridge__end { display: none; }
 
@@ -968,6 +971,24 @@ svg:not(.bridge__svg) path { fill: none; stroke: currentColor; stroke-width: 1.5
 .footer__nav a { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); text-decoration: none; }
 .footer__nav a:hover, .footer__nav a:focus-visible { color: var(--gold-1); }
 .footer__copy { font-size: 12px; color: var(--ink-dim); }
+
+/* ═══════════ Sponsor hot-air balloon (interactive: src/lib/balloon.js) ═══════════
+   Sits behind the islands (DOM order) and below the HUD. balloon.js positions it with transform only. */
+.balloon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(56px, 5.5vw, 104px);
+  cursor: grab;
+  touch-action: none;
+  transform-origin: 50% 22%;
+  opacity: 0;                    /* shown once balloon.js has placed it */
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.balloon.is-ready { opacity: 1; transition: opacity .8s ease; }
+.balloon.is-held { cursor: grabbing; }
+.balloon img { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; }
 
 /* ═══════════ Mobile: bridge + sliding island carousel ═══════════ */
 

@@ -9,6 +9,7 @@
 
 import Lenis from "lenis";
 import { Portal, warpOut, arrive, reduceMotion } from "./fx.js";
+import { initBalloon } from "./balloon.js";
 
 const CONFIG = {
   // Fest start (local time). Change when the date is final.
@@ -553,8 +554,10 @@ export function initLanding() {
   const offscreenObserver = new IntersectionObserver(([e]) => stage.classList.toggle("is-offscreen", !e.isIntersecting));
   offscreenObserver.observe(stage);
   rafId = requestAnimationFrame(frame);
+  const disposeBalloon = initBalloon(stage, { reduceMotion });
 
   return function dispose() {
+    disposeBalloon();
     disposed = true;
     if (rafId != null) cancelAnimationFrame(rafId);
     clearInterval(countdownInterval);
