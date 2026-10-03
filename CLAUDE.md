@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Install: `npm install`
 - Dev server: `npm run dev` (Vite, default port 5173 — same port the old `serve.py` used). `.claude/launch.json` defines this as the `site` configuration.
 - Build: `npm run build` → `dist/`. `npm run preview` serves that build locally.
-- Deploy: Vercel project `magnera-26` (linked in `.vercel/`, `vercel.json` sets `framework: vite`). `vercel.json` also sets cache headers for `/assets/*.webp|svg` (7 days + stale-while-revalidate — asset filenames are not hashed, so don't make them `immutable`). `.vercelignore` keeps `.claude`, `CLAUDE.md`, `design-refs` (unused source art, kept for reference but never published), `.env*` and `.vercel` out of the deploy.
+- Deploy: Vercel project `magnera-26` (linked in `.vercel/`, `vercel.json` sets `framework: vite`). `vercel.json` also sets cache headers for `/assets/:path*` (keep `source` patterns simple path-to-regexp — regex-style sources made Vercel reject the file) (7 days + stale-while-revalidate — asset filenames are not hashed, so don't make them `immutable`). `.vercelignore` keeps `.claude`, `CLAUDE.md`, `design-refs` (unused source art, kept for reference but never published), `.env*` and `.vercel` out of the deploy.
 
 ## Architecture
 
